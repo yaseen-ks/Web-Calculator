@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="calculator">
+        <!-- Display -->
+        <input type="text" id="display" class="display" readonly>
+        
+        <!-- Buttons -->
+        <div class="buttons">
+            <button onclick="clearDisplay()" class="action">AC</button>
+            <button onclick="deleteLast()" class="action">C</button>
+            <button onclick="appendValue('%')" class="operator">%</button>
+            <button onclick="appendValue('/')" class="operator">/</button>
+            
+            <button onclick="appendValue('7')" class="number">7</button>
+            <button onclick="appendValue('8')" class="number">8</button>
+            <button onclick="appendValue('9')" class="number">9</button>
+            <button onclick="appendValue('*')" class="operator">*</button>
+            
+            <button onclick="appendValue('4')" class="number">4</button>
+            <button onclick="appendValue('5')" class="number">5</button>
+            <button onclick="appendValue('6')" class="number">6</button>
+            <button onclick="appendValue('-')" class="operator">-</button>
+            
+            <button onclick="appendValue('1')" class="number">1</button>
+            <button onclick="appendValue('2')" class="number">2</button>
+            <button onclick="appendValue('3')" class="number">3</button>
+            <button onclick="appendValue('+')" class="operator">+</button>
+            
+            <button onclick="appendValue('0')" class="number zero">0</button>
+            <button onclick="appendValue('.')" class="number">.</button>
+            <button onclick="calculate()" class="action">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+
+        function appendValue(value) {
+            display.value += value;
+        }
+
+        function clearDisplay() {
+            display.value = '';
+        }
+
+        function deleteLast() {
+            display.value = display.value.slice(0, -1);
+        }
+
+        async function calculate() {
+            const response = await fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ expression: display.value })
+            });
+            const result = await response.json();
+            display.value = result.result;
+        }
+
+        document.addEventListener('keydown', function (event) {
+            const key = event.key;
+
+            if (key >= '0' && key <= '9') {
+                appendValue(key);
+            } else if (['+', '-', '*', '/'].includes(key)) {
+                appendValue(key);
+            } else if (key === 'Enter') {
+                event.preventDefault();
+                calculate();
+            } else if (key === 'Backspace') {
+                deleteLast();
+            } else if (key === 'Escape') {
+                clearDisplay();
+            } else if (key === '.') {
+                appendValue('.');
+            }
+        });
+    </script>
+</body>
+</html>
